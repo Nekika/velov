@@ -4,6 +4,18 @@ import { reactive, onMounted } from 'vue'
 const LYON_LAT_LNG = [45.763420, 4.834277]
 const BASE_ZOOM = 13
 
+const createIcon = properties => {
+    const capacity = properties.bike_stands
+    const availability = properties.available_bikes
+    const ratio = availability / capacity
+    console.log(ratio)
+    const color = ratio === 0 ? 'red' : ratio <= 0.5 ? 'orange' : 'green'
+    return L.icon({
+        iconUrl: require(`@/assets/icons/station-${color}.svg`),
+        iconSize: [16, 16]
+    })
+}
+
 const createPopUpContent = properties => {
     return `<h3>${properties.name}</h3>
     <p><b>Address</b> : ${properties.address}</p>
@@ -16,8 +28,9 @@ const createPopUpContent = properties => {
 const createMarkers = (map, features) => {
     return features.forEach(f => {
         const coordinates = f.geometry.coordinates.reverse()
+        const options = { icon: createIcon(f.properties) }
         const popupContent = createPopUpContent(f.properties)
-        L.marker(coordinates)
+        L.marker(coordinates, options)
         .bindPopup(popupContent)
         .addTo(map)
     })
